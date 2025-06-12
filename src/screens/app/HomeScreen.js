@@ -1,16 +1,17 @@
 import React from "react";
 import { View, Text, TouchableOpacity, StyleSheet, Alert } from "react-native";
 import { Ionicons } from "@expo/vector-icons";
+import { useAuth } from "../../context/AuthContext";
 
 export default function HomeScreen() {
+  const { user, token, logout } = useAuth();
+
   const handleLogout = () => {
     Alert.alert("Sair", "Tem certeza que deseja sair?", [
       { text: "Cancelar", style: "cancel" },
       {
         text: "Sim",
-        onPress: () => {
-          // Lógica de logout aqui
-        },
+        onPress: () => logout(),
       },
     ]);
   };
@@ -18,6 +19,7 @@ export default function HomeScreen() {
   return (
     <View style={styles.container}>
       <Text style={styles.title}>Olá, bem-vindo 👋</Text>
+      <Text style={styles.subtitle}>{user.email}</Text>
       <Text style={styles.subtitle}>Você está na tela inicial</Text>
 
       <TouchableOpacity style={styles.button} onPress={handleLogout}>

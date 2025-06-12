@@ -11,12 +11,14 @@ import {
   ActivityIndicator,
 } from "react-native";
 import { Ionicons } from "@expo/vector-icons";
+import { useAuth } from "../../context/AuthContext";
 
 export default function LoginScreen({ navigation }) {
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
   const [showPassword, setShowPassword] = useState(false);
   const [loading, setLoading] = useState(false);
+  const { signIn } = useAuth();
 
   const handleLogin = async () => {
     if (!email.trim() || !password.trim()) {
@@ -37,7 +39,11 @@ export default function LoginScreen({ navigation }) {
 
     try {
       setLoading(true);
-      // Lógica de autenticação aqui
+      const response = await signIn({ email, password });
+      if (response?.error) {
+        Alert.alert("Erro", response.error);
+        return;
+      }
     } catch (error) {
       Alert.alert("Erro inesperado", error.message);
     } finally {

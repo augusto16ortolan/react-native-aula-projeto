@@ -11,8 +11,10 @@ import {
   ActivityIndicator,
 } from "react-native";
 import { Ionicons } from "@expo/vector-icons";
+import { register } from "../../services/AuthService";
 
 export default function SignUpScreen({ navigation }) {
+  const [name, setName] = useState("");
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
   const [confirmPassword, setConfirmPassword] = useState("");
@@ -21,7 +23,12 @@ export default function SignUpScreen({ navigation }) {
   const [loading, setLoading] = useState(false);
 
   const handleSignUp = async () => {
-    if (!email.trim() || !password.trim() || !confirmPassword.trim()) {
+    if (
+      !email.trim() ||
+      !password.trim() ||
+      !confirmPassword.trim() ||
+      !name.trim()
+    ) {
       Alert.alert("Campos obrigatórios", "Preencha todos os campos.");
       return;
     }
@@ -44,7 +51,16 @@ export default function SignUpScreen({ navigation }) {
 
     try {
       setLoading(true);
-      // Lógica de cadastro aqui
+      let user = { name, email, password };
+      const response = await register(user);
+
+      if (response.error) {
+        Alert.alert("Erro", response.error);
+        return;
+      }
+
+      Alert.alert("Sucesso", "Cadastro realizado com sucesso.");
+      navigation.navigate("Login");
     } catch (error) {
       Alert.alert("Erro inesperado", error.message);
     } finally {
@@ -59,6 +75,22 @@ export default function SignUpScreen({ navigation }) {
     >
       <Text style={styles.title}>Crie sua conta 📝</Text>
       <Text style={styles.subtitle}>Cadastre-se com seu e-mail</Text>
+
+      <View style={styles.inputContainer}>
+        <Ionicons
+          name="person-outline"
+          size={22}
+          color="#4e73df"
+          style={styles.icon}
+        />
+        <TextInput
+          placeholder="Seu nome"
+          placeholderTextColor="#aaa"
+          style={styles.input}
+          value={name}
+          onChangeText={setName}
+        />
+      </View>
 
       <View style={styles.inputContainer}>
         <Ionicons
