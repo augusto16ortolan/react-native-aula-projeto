@@ -14,9 +14,7 @@ export async function register(user) {
 export async function login(credentials) {
   try {
     const response = await api.post("/auth/signin", credentials);
-    return {
-      token: response.data,
-    };
+    return response.data;
   } catch (error) {
     console.log(error.response.data);
     //Verificar todos os codigos de retorno e devolver as mensagens para o usuario

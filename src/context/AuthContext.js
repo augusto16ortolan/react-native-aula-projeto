@@ -30,7 +30,7 @@ export default function AuthProvider({ children }) {
       return { error: response.error };
     }
 
-    setUser({ email: credentials.email });
+    setUser(response.user);
     setToken(response.token);
 
     if (!isInit) {
@@ -44,7 +44,7 @@ export default function AuthProvider({ children }) {
   async function signUp(credentials) {
     const response = await register(credentials);
 
-    if (response.error) {
+    if (response?.error) {
       return { error: response.error };
     }
   }
