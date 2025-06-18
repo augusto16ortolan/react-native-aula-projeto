@@ -13,6 +13,7 @@ import { Ionicons } from "@expo/vector-icons";
 import { useAuth } from "../../context/AuthContext";
 import { useCart } from "../../context/CartContext";
 import { useFocusEffect } from "@react-navigation/native";
+import { getProducts } from "../../services/ProductService";
 
 export default function HomeScreen({ navigation }) {
   const [products, setProducts] = useState([]);
@@ -25,8 +26,8 @@ export default function HomeScreen({ navigation }) {
   const fetchProducts = async () => {
     try {
       setLoading(true);
-      //Adicionar metodo de carregar produtos
-      setProducts(response);
+      const response = await getProducts("BRL");
+      setProducts(response.products);
     } catch (error) {
       Alert.alert("Erro ao carregar produtos", error.message);
     } finally {
@@ -73,7 +74,7 @@ export default function HomeScreen({ navigation }) {
   const renderItem = ({ item }) => {
     const imageSource =
       item.imageUrl && item.imageUrl.trim() !== ""
-        ? { uri: item.imageUrl }
+        ? DEFAULT_IMAGE //{ uri: item.imageUrl }
         : DEFAULT_IMAGE;
 
     return (
@@ -84,7 +85,9 @@ export default function HomeScreen({ navigation }) {
         <Image source={imageSource} style={styles.productImage} />
         <Text style={styles.productDescription}>{item.description}</Text>
         <Text style={styles.productBrand}>{item.brand}</Text>
-        <Text style={styles.productPrice}>R$ {item.price.toFixed(2)}</Text>
+        <Text style={styles.productPrice}>
+          R$ {item.convertedPrice.toFixed(2)}
+        </Text>
       </TouchableOpacity>
     );
   };
@@ -185,8 +188,8 @@ const styles = StyleSheet.create({
   },
   cartBadge: {
     position: "absolute",
-    top: -6,
-    right: -10,
+    top: 1,
+    right: 1,
     backgroundColor: "#ff3b30",
     borderRadius: 10,
     minWidth: 18,

@@ -9,6 +9,7 @@ import {
 } from "react-native";
 import { useNavigation, useFocusEffect } from "@react-navigation/native";
 import { useAuth } from "../../context/AuthContext";
+import { getOrders } from "../../services/OrderService";
 
 export default function OrdersScreen() {
   const [orders, setOrders] = useState([]);
@@ -25,7 +26,7 @@ export default function OrdersScreen() {
         try {
           setLoading(true);
           setError(null);
-          //Adicionar metodo de carregar pedidos
+          const response = await getOrders(token);
           if (isActive) {
             setOrders(response.orders || []);
           }

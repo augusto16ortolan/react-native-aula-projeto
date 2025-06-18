@@ -11,6 +11,7 @@ import {
 } from "react-native";
 import { useCart } from "../../context/CartContext";
 import { useAuth } from "../../context/AuthContext";
+import { getProductById } from "../../services/ProductService";
 
 export default function ProductDetailScreen({ route, navigation }) {
   const { id } = route.params;
@@ -25,8 +26,8 @@ export default function ProductDetailScreen({ route, navigation }) {
   const fetchProduct = async () => {
     try {
       setLoading(true);
-      //Adicionar metodo de carregar produto
-      setProduct(response);
+      const response = await getProductById(id);
+      setProduct(response.product);
     } catch (error) {
       Alert.alert("Erro ao carregar produto", error.message);
     } finally {
@@ -88,7 +89,7 @@ export default function ProductDetailScreen({ route, navigation }) {
 
   const imageSource =
     product.imageUrl && product.imageUrl.trim() !== ""
-      ? { uri: product.imageUrl }
+      ? DEFAULT_IMAGE //{ uri: product.imageUrl }
       : DEFAULT_IMAGE;
 
   return (

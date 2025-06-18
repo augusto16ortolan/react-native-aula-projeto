@@ -13,6 +13,7 @@ import { Ionicons } from "@expo/vector-icons";
 import { useCart } from "../../context/CartContext";
 import { useAuth } from "../../context/AuthContext";
 import { useNavigation } from "@react-navigation/native";
+import { createOrder } from "../../services/OrderService";
 
 const DEFAULT_IMAGE = require("../../../assets/default_image.png");
 
@@ -43,7 +44,9 @@ export default function CartScreen() {
 
     try {
       setLoading(true);
-      //Adicionar metodo de criar pedido
+
+      const response = await createOrder(cartItems, token);
+      const order = response.order;
 
       clearCart();
 
