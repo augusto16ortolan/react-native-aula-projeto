@@ -32,10 +32,10 @@ export default function LoginScreen({ navigation }) {
       return;
     }
 
-    if (password.length < 6) {
-      Alert.alert("Senha inválida", "A senha deve ter no mínimo 6 caracteres.");
-      return;
-    }
+    // if (password.length < 6) {
+    //   Alert.alert("Senha inválida", "A senha deve ter no mínimo 6 caracteres.");
+    //   return;
+    // }
 
     try {
       setLoading(true);

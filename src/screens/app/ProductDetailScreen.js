@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from "react";
+import React, { useState, useEffect, useCallback } from "react";
 import {
   View,
   Text,
@@ -11,12 +11,13 @@ import {
 } from "react-native";
 import { useCart } from "../../context/CartContext";
 import { useAuth } from "../../context/AuthContext";
-import { getProductById } from "../../services/ProductService";
+import { getProductById, deleteProduct } from "../../services/ProductService";
+import { useFocusEffect } from "@react-navigation/native";
 
 export default function ProductDetailScreen({ route, navigation }) {
   const { id } = route.params;
   const { addToCart } = useCart();
-  const { user } = useAuth();
+  const { user, token } = useAuth();
 
   const [product, setProduct] = useState(null);
   const [loading, setLoading] = useState(false);
@@ -35,9 +36,15 @@ export default function ProductDetailScreen({ route, navigation }) {
     }
   };
 
-  useEffect(() => {
-    fetchProduct();
-  }, [id]);
+  // useEffect(() => {
+  //   fetchProduct();
+  // }, [id]);
+
+  useFocusEffect(
+    useCallback(() => {
+      fetchProduct();
+    }, [id])
+  );
 
   const handleAddToCart = () => {
     addToCart(product);
@@ -59,7 +66,7 @@ export default function ProductDetailScreen({ route, navigation }) {
           style: "destructive",
           onPress: async () => {
             try {
-              //Adicionar metodo de excluir produto
+              await deleteProduct(id, token);
               Alert.alert("Sucesso", "Produto excluído com sucesso!");
               navigation.goBack();
             } catch (error) {
@@ -89,7 +96,7 @@ export default function ProductDetailScreen({ route, navigation }) {
 
   const imageSource =
     product.imageUrl && product.imageUrl.trim() !== ""
-      ? DEFAULT_IMAGE //{ uri: product.imageUrl }
+      ? { uri: product.imageUrl }
       : DEFAULT_IMAGE;
 
   return (

@@ -74,7 +74,7 @@ export default function HomeScreen({ navigation }) {
   const renderItem = ({ item }) => {
     const imageSource =
       item.imageUrl && item.imageUrl.trim() !== ""
-        ? DEFAULT_IMAGE //{ uri: item.imageUrl }
+        ? { uri: item.imageUrl }
         : DEFAULT_IMAGE;
 
     return (
@@ -111,7 +111,7 @@ export default function HomeScreen({ navigation }) {
         columnWrapperStyle={styles.columnWrapper}
       />
 
-      {user?.type === "Common" && (
+      {user?.type === "Admin" && (
         <TouchableOpacity
           style={styles.fab}
           onPress={() => navigation.navigate("ProductForm")}
