@@ -14,41 +14,63 @@ import { getOrders } from "../../services/OrderService";
 export default function OrdersScreen() {
   const [orders, setOrders] = useState([]);
   const [loading, setLoading] = useState(true);
+  const [loadingMore, setLoadingMore] = useState(false);
+  const [refreshing, setRefreshing] = useState(false);
   const [error, setError] = useState(null);
+  const [page, setPage] = useState(0);
+  const [hasMore, setHasMore] = useState(true);
   const navigation = useNavigation();
   const { token } = useAuth();
 
-  useFocusEffect(
-    useCallback(() => {
-      let isActive = true;
-
-      async function fetchOrders() {
-        try {
-          setLoading(true);
-          setError(null);
-          const response = await getOrders(token);
-          if (isActive) {
-            setOrders(response.orders || []);
-          }
-        } catch (err) {
-          if (isActive) {
-            setError("Erro ao carregar pedidos. Tente novamente.");
-          }
-        } finally {
-          if (isActive) {
-            setLoading(false);
-          }
-        }
+  const fetchOrders = async (pageToLoad = 0, append = false) => {
+    try {
+      if (pageToLoad === 0 && !append) {
+        setLoading(true);
+        setError(null);
+      } else if (append) {
+        setLoadingMore(true);
       }
 
-      fetchOrders();
+      const response = await getOrders(token, "BRL", pageToLoad);
 
-      // cleanup function
-      return () => {
-        isActive = false;
-      };
+      const newOrders = response.orders || [];
+
+      setHasMore(newOrders.length > 0);
+
+      if (append) {
+        setOrders((prev) => [...prev, ...newOrders]);
+      } else {
+        setOrders(newOrders);
+      }
+    } catch (err) {
+      setError("Erro ao carregar pedidos. Tente novamente.");
+    } finally {
+      setLoading(false);
+      setLoadingMore(false);
+      setRefreshing(false);
+    }
+  };
+
+  useFocusEffect(
+    useCallback(() => {
+      setPage(0);
+      fetchOrders(0, false);
     }, [token])
   );
+
+  const handleLoadMore = () => {
+    if (!loadingMore && hasMore && !refreshing) {
+      const nextPage = page + 1;
+      setPage(nextPage);
+      fetchOrders(nextPage, true);
+    }
+  };
+
+  const handleRefresh = () => {
+    setRefreshing(true);
+    setPage(0);
+    fetchOrders(0, false);
+  };
 
   const formatDate = (isoDate) => {
     const date = new Date(isoDate);
@@ -75,7 +97,14 @@ export default function OrdersScreen() {
     </TouchableOpacity>
   );
 
-  if (loading) {
+  const renderFooter = () =>
+    loadingMore ? (
+      <View style={styles.footer}>
+        <ActivityIndicator size="small" color="#4e73df" />
+      </View>
+    ) : null;
+
+  if (loading && !refreshing) {
     return (
       <View style={styles.center}>
         <ActivityIndicator size="large" color="#4e73df" />
@@ -105,6 +134,11 @@ export default function OrdersScreen() {
       keyExtractor={(item) => item.id.toString()}
       renderItem={renderOrder}
       contentContainerStyle={styles.list}
+      onEndReached={handleLoadMore}
+      onEndReachedThreshold={0.3}
+      ListFooterComponent={renderFooter}
+      refreshing={refreshing}
+      onRefresh={handleRefresh}
     />
   );
 }
@@ -118,6 +152,10 @@ const styles = StyleSheet.create({
   list: {
     padding: 16,
   },
+  footer: {
+    paddingVertical: 16,
+    alignItems: "center",
+  },
   orderCard: {
     backgroundColor: "#fff",
     padding: 16,
@@ -128,6 +166,7 @@ const styles = StyleSheet.create({
     shadowOffset: { width: 0, height: 1 },
     shadowOpacity: 0.1,
     shadowRadius: 3,
+    height: 300,
   },
   orderId: {
     fontWeight: "bold",
